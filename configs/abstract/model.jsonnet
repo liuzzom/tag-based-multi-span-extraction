@@ -124,7 +124,7 @@
     "trainer": {
         "cuda_device": 0,
         "keep_serialized_model_every_num_seconds": 3600,
-        "num_epochs": 35,
+        "num_epochs": 20,
         "optimizer": {
             "type": "bert_adam",
             "lr": error "Must override trainer.optimizer.lr",
