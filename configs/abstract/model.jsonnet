@@ -84,6 +84,7 @@
     },
     "dataset_reader": {
         "type": error "Must override reader.type",
+        "lazy": true,
         "tokenizer": {
             "type": "huggingface_transformers",
             "pretrained_model": $.pretrained_model
