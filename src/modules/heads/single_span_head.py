@@ -8,6 +8,7 @@ from allennlp.modules import FeedForward
 from src.modules.heads.head import Head
 from src.modules.utils.decoding_utils import decode_token_spans
 
+
 class SingleSpanHead(Head):
     def __init__(self,
                  start_output_layer: FeedForward,
@@ -18,9 +19,9 @@ class SingleSpanHead(Head):
         self._end_output_layer = end_output_layer
         self._training_style = training_style
 
-    def forward(self,                
+    def forward(self,
                 **kwargs: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        
+
         input, mask = self.get_input_and_mask(kwargs)
 
         # Shape: (batch_size, passage_length)
@@ -47,10 +48,10 @@ class SingleSpanHead(Head):
         return output_dict
 
     def gold_log_marginal_likelihood(self,
-                                 gold_answer_representations: Dict[str, torch.LongTensor],
-                                 start_log_probs: torch.LongTensor,
-                                 end_log_probs: torch.LongTensor,
-                                 **kwargs: Any):
+                                     gold_answer_representations: Dict[str, torch.LongTensor],
+                                     start_log_probs: torch.LongTensor,
+                                     end_log_probs: torch.LongTensor,
+                                     **kwargs: Any):
         answer_as_spans = self.get_gold_answer_representations(gold_answer_representations)
 
         # Shape: (batch_size, # of answer spans)
@@ -80,7 +81,9 @@ class SingleSpanHead(Head):
             log_marginal_likelihood_for_span = logsumexp(log_likelihood_for_spans)
         elif self._training_style == 'hard_em':
             most_likely_span_index = log_likelihood_for_spans.argmax(dim=-1)
-            log_marginal_likelihood_for_span = log_likelihood_for_spans.gather(dim=1, index=most_likely_span_index.unsqueeze(-1)).squeeze(dim=-1)
+            log_marginal_likelihood_for_span = log_likelihood_for_spans.gather(dim=1,
+                                                                               index=most_likely_span_index.unsqueeze(
+                                                                                   -1)).squeeze(dim=-1)
         else:
             raise Exception("Illegal training_style")
 
@@ -92,8 +95,8 @@ class SingleSpanHead(Head):
                       p_text: str,
                       q_text: str,
                       **kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        
-        (predicted_start, predicted_end)  = tuple(best_span.detach().cpu().numpy())
+
+        (predicted_start, predicted_end) = tuple(best_span.detach().cpu().numpy())
         answer_tokens = qp_tokens[predicted_start:predicted_end + 1]
         spans_text, spans_indices = decode_token_spans([(self.get_context(), answer_tokens)], p_text, q_text)
         predicted_answer = spans_text[0]
@@ -102,17 +105,19 @@ class SingleSpanHead(Head):
             'value': predicted_answer,
             'spans': spans_indices
         }
-      
+
         return answer_dict
 
     def get_input_and_mask(self, kwargs: Dict[str, Any]) -> torch.LongTensor:
         raise NotImplementedError
 
-    def get_gold_answer_representations(self, gold_answer_representations: Dict[str, torch.LongTensor]) -> torch.LongTensor:
+    def get_gold_answer_representations(self,
+                                        gold_answer_representations: Dict[str, torch.LongTensor]) -> torch.LongTensor:
         raise NotImplementedError
 
     def get_context(self) -> str:
         raise NotImplementedError
+
 
 def get_best_span(span_start_logits: torch.Tensor, span_end_logits: torch.Tensor) -> torch.Tensor:
     """

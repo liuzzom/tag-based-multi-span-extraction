@@ -1,0 +1,6 @@
+Remote origin URL: https://github.com/liuzzom/tag-based-multi-span-extraction.git
+Branch: master
+Commit Hash: 5f30178924fe3ed57c900c589aa15c1960ac4f7c
+Authored Time: 2021-01-31 19:07:10
+Commit Message: added laziness for executions in colab
+

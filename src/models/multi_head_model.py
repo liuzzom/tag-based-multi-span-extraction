@@ -1,11 +1,9 @@
-from typing import Any, Dict, List, Optional, Union
 import logging
+from typing import Any, Dict, List, Optional
 
 import torch
-
 from allennlp.data import Vocabulary
 from allennlp.models.model import Model
-from allennlp.models.reading_comprehension.util import get_best_span
 from allennlp.modules import FeedForward
 from allennlp.nn import util, InitializerApplicator, RegularizerApplicator
 from allennlp.nn.util import masked_softmax
@@ -16,25 +14,26 @@ from src.training.metrics.custom_em_and_f1 import CustomEmAndF1
 
 logger = logging.getLogger(__name__)
 
+
 @Model.register('multi_head')
 class MultiHeadModel(Model):
-    def __init__(self, 
-                vocab: Vocabulary,
-                pretrained_model: str,
-                heads: Dict[str, Head],
-                dataset_name,
-                head_predictor: Optional[FeedForward] = None,
-                passage_summary_vector_module: Optional[FeedForward] = None,
-                question_summary_vector_module: Optional[FeedForward] = None,
-                training_evaluation: bool = True,
-                output_all_answers: bool = False,
-                initializer: InitializerApplicator = InitializerApplicator(),
-                regularizer: Optional[RegularizerApplicator] = None) -> None:
+    def __init__(self,
+                 vocab: Vocabulary,
+                 pretrained_model: str,
+                 heads: Dict[str, Head],
+                 dataset_name,
+                 head_predictor: Optional[FeedForward] = None,
+                 passage_summary_vector_module: Optional[FeedForward] = None,
+                 question_summary_vector_module: Optional[FeedForward] = None,
+                 training_evaluation: bool = True,
+                 output_all_answers: bool = False,
+                 initializer: InitializerApplicator = InitializerApplicator(),
+                 regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
 
         self._pretrained_model = pretrained_model
         self._transformers_model = AutoModel.from_pretrained(pretrained_model)
-        
+
         self._heads = torch.nn.ModuleDict(heads)
         self._head_predictor = head_predictor
         self._passage_summary_vector_module = passage_summary_vector_module
@@ -85,7 +84,7 @@ class MultiHeadModel(Model):
         # (batch_size, #num of numbers, out) for numbers
         h = util.weighted_sum(encoding, alpha)
         return h
-        
+
     def forward(self,  # type: ignore
                 question_passage_tokens: torch.LongTensor,
                 question_passage_token_type_ids: torch.LongTensor,
@@ -106,7 +105,7 @@ class MultiHeadModel(Model):
                 is_bio_mask: torch.LongTensor = None) -> Dict[str, Any]:
         # pylint: disable=arguments-differ
         question_passage_special_tokens_mask = (1 - question_passage_special_tokens_mask)
-        
+
         batch_size = question_passage_tokens.shape[0]
         head_count = len(self._heads)
 
@@ -131,16 +130,17 @@ class MultiHeadModel(Model):
         # Shape: (batch_size, seqlen)
         passage_mask = question_passage_token_type_ids * question_passage_pad_mask * question_passage_special_tokens_mask
         # Shape: (batch_size, seqlen)
-        question_mask = (1 - question_passage_token_type_ids) * question_passage_pad_mask * question_passage_special_tokens_mask
+        question_mask = (
+                                    1 - question_passage_token_type_ids) * question_passage_pad_mask * question_passage_special_tokens_mask
         question_and_passage_mask = question_mask | passage_mask
 
         # Shape: (batch_size, seqlen, bert_dim)
-        token_representations = self._transformers_model(question_passage_tokens, 
-                                             token_type_ids=(question_passage_token_type_ids 
-                                                             if not self._pretrained_model.startswith('roberta-') 
-                                                             else None), 
-                                             attention_mask=question_passage_pad_mask)[0]
-        
+        token_representations = self._transformers_model(question_passage_tokens,
+                                                         token_type_ids=(question_passage_token_type_ids
+                                                                         if not self._pretrained_model.startswith('roberta-')
+                                                                         else None),
+                                                         attention_mask=question_passage_pad_mask)[0]
+
         if self._passage_summary_vector_module is not None:
             # Shape: (batch_size, bert_dim)
             passage_summary_vector = self.summary_vector(token_representations, passage_mask, 'passage')
@@ -180,7 +180,7 @@ class MultiHeadModel(Model):
         head_outputs = {}
         for head_name, head in self._heads.items():
             head_outputs[head_name] = head(**kwargs)
-                        
+
         output_dict = {}
         # If answer is given, compute the loss.
         if has_answer:
@@ -188,7 +188,7 @@ class MultiHeadModel(Model):
             for head_name, head in self._heads.items():
                 log_marginal_likelihood = head.gold_log_marginal_likelihood(**kwargs, **head_outputs[head_name])
                 log_marginal_likelihood_list.append(log_marginal_likelihood)
-            
+
             if head_count > 1:
                 # Add the ability probabilities if there is more than one ability
                 all_log_marginal_likelihoods = torch.stack(log_marginal_likelihood_list, dim=-1)
@@ -196,7 +196,7 @@ class MultiHeadModel(Model):
                 marginal_log_likelihood = util.logsumexp(all_log_marginal_likelihoods)
             else:
                 marginal_log_likelihood = log_marginal_likelihood_list[0]
-        
+
             output_dict['loss'] = -1 * marginal_log_likelihood.mean()
 
         with torch.no_grad():
@@ -228,7 +228,8 @@ class MultiHeadModel(Model):
                         'p_text': metadata[i]['original_passage'],
                         'qp_tokens': metadata[i]['question_passage_tokens'],
                         'question_passage_wordpieces': metadata[i]['question_passage_wordpieces'],
-                        'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in metadata[i] else None,
+                        'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in metadata[
+                            i] else None,
                     }
 
                     # keys that cannot be passed because 
@@ -249,7 +250,6 @@ class MultiHeadModel(Model):
                         if key not in unpassable_keys:
                             instance_kwargs[key] = value[i]
 
-
                     # get prediction for an instance in the batch
                     answer_json = predicting_head.decode_answer(**instance_kwargs)
 
@@ -259,7 +259,8 @@ class MultiHeadModel(Model):
                         no_fallback = False
                     else:
                         if not self.training:
-                            logger.info("Answer was empty for head: %s, query_id: %s", predicting_head_name, metadata[i]['question_id'])
+                            logger.info("Answer was empty for head: %s, query_id: %s", predicting_head_name,
+                                        metadata[i]['question_id'])
                         ordered_lookup_index += 1
                         if ordered_lookup_index == head_count:
                             no_fallback = True
@@ -270,7 +271,8 @@ class MultiHeadModel(Model):
                     em, f1 = None, None
                     answer_annotations = metadata[i].get('answer_annotations', [])
                     if answer_annotations:
-                        (em, f1), maximizing_ground_truth = self._metrics.call(answer_json['value'], answer_annotations, predicting_head_name)
+                        (em, f1), maximizing_ground_truth = self._metrics.call(answer_json['value'], answer_annotations,
+                                                                               predicting_head_name)
 
                     if not self.training:
                         output_dict['passage_id'].append(metadata[i]['passage_id'])
@@ -281,7 +283,7 @@ class MultiHeadModel(Model):
                         output_dict['em'].append(em)
                         output_dict['f1'].append(f1)
                         output_dict['max_passage_length'].append(metadata[i]['max_passage_length'])
-                        
+
                         if self._output_all_answers:
                             answers_dict = {}
                             output_dict['all_answers'].append(answers_dict)
@@ -296,7 +298,8 @@ class MultiHeadModel(Model):
                                     'p_text': metadata[i]['original_passage'],
                                     'qp_tokens': metadata[i]['question_passage_tokens'],
                                     'question_passage_wordpieces': metadata[i]['question_passage_wordpieces'],
-                                    'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in metadata[i] else None,
+                                    'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in
+                                                                                           metadata[i] else None,
                                 }
 
                                 # keys that cannot be passed because 
@@ -319,7 +322,8 @@ class MultiHeadModel(Model):
 
                                 # get prediction for an instance in the batch
                                 answer_json = predicting_head.decode_answer(**instance_kwargs)
-                                answer_json['probability'] = torch.nn.functional.softmax(answer_ability_logits, -1)[i][predicting_head_index].item()
+                                answer_json['probability'] = torch.nn.functional.softmax(answer_ability_logits, -1)[i][
+                                    predicting_head_index].item()
                                 answers_dict[predicting_head_name] = answer_json
 
                     i += 1
@@ -332,7 +336,8 @@ class MultiHeadModel(Model):
         metrics = {'em': exact_match, 'f1': f1_score}
 
         for answer_type, type_scores_per_head in scores_per_answer_type_and_head.items():
-            for head, (answer_type_head_exact_match, answer_type_head_f1_score, type_head_count) in type_scores_per_head.items():
+            for head, (
+            answer_type_head_exact_match, answer_type_head_f1_score, type_head_count) in type_scores_per_head.items():
                 if 'multi' in head and 'span' in answer_type:
                     metrics[f'em_{answer_type}_{head}'] = answer_type_head_exact_match
                     metrics[f'f1_{answer_type}_{head}'] = answer_type_head_f1_score
@@ -340,7 +345,7 @@ class MultiHeadModel(Model):
                     metrics[f'_em_{answer_type}_{head}'] = answer_type_head_exact_match
                     metrics[f'_f1_{answer_type}_{head}'] = answer_type_head_f1_score
                 metrics[f'_counter_{answer_type}_{head}'] = type_head_count
-        
+
         for answer_type, (type_exact_match, type_f1_score, type_count) in scores_per_answer_type.items():
             if 'span' in answer_type:
                 metrics[f'em_{answer_type}'] = type_exact_match
@@ -368,5 +373,5 @@ class MultiHeadModel(Model):
 
             metrics['em_all_spans'] = em_all_spans
             metrics['f1_all_spans'] = f1_all_spans
-        
+
         return metrics

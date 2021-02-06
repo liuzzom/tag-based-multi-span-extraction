@@ -7,6 +7,7 @@ from allennlp.modules import FeedForward
 
 from src.modules.heads.head import Head
 
+
 @Head.register('arithmetic_head')
 class ArithmeticHead(Head):
     def __init__(self,
@@ -32,20 +33,21 @@ class ArithmeticHead(Head):
 
         number_mask = self._get_mask(number_indices, with_special_numbers=False)
 
-        clamped_number_indices = replace_masked_values(number_indices[:,:,0].long(), number_mask, 0)
+        clamped_number_indices = replace_masked_values(number_indices[:, :, 0].long(), number_mask, 0)
         encoded_numbers = torch.gather(
-                token_representations,
-                1,
-                clamped_number_indices.unsqueeze(-1).expand(-1, -1, token_representations.size(-1)))
-            
+            token_representations,
+            1,
+            clamped_number_indices.unsqueeze(-1).expand(-1, -1, token_representations.size(-1)))
+
         if self._num_special_numbers > 0:
-            special_numbers = self._special_embeddings(torch.arange(self._num_special_numbers, device=number_indices.device))
-            special_numbers = special_numbers.expand(number_indices.shape[0],-1,-1)
+            special_numbers = self._special_embeddings(
+                torch.arange(self._num_special_numbers, device=number_indices.device))
+            special_numbers = special_numbers.expand(number_indices.shape[0], -1, -1)
             encoded_numbers = torch.cat([special_numbers, encoded_numbers], 1)
-            
+
         # Shape: (batch_size, # of numbers, 2*bert_dim)
         encoded_numbers = torch.cat(
-                [encoded_numbers, passage_summary_vector.unsqueeze(1).repeat(1, encoded_numbers.size(1), 1)], -1)
+            [encoded_numbers, passage_summary_vector.unsqueeze(1).repeat(1, encoded_numbers.size(1), 1)], -1)
 
         # Shape: (batch_size, # of numbers in the passage, 3)
         logits = self._output_layer(encoded_numbers)
@@ -65,10 +67,10 @@ class ArithmeticHead(Head):
         return output_dict
 
     def gold_log_marginal_likelihood(self,
-                                 gold_answer_representations: Dict[str, torch.LongTensor],
-                                 log_probs: torch.LongTensor,
-                                 number_indices: torch.LongTensor,
-                                 **kwargs: Any):
+                                     gold_answer_representations: Dict[str, torch.LongTensor],
+                                     log_probs: torch.LongTensor,
+                                     number_indices: torch.LongTensor,
+                                     **kwargs: Any):
         answer_as_expressions_extra = gold_answer_representations['answer_as_expressions_extra']
         answer_as_expressions = gold_answer_representations['answer_as_expressions']
 
@@ -92,13 +94,15 @@ class ArithmeticHead(Head):
         # For those padded combinations, we set their log probabilities to be very small negative value
         log_likelihood_for_add_subs = \
             replace_masked_values(log_likelihood_for_add_subs, gold_add_sub_mask, -1e7)
-        
+
         # Shape: (batch_size,)
         if self._training_style == 'soft_em':
             log_marginal_likelihood = logsumexp(log_likelihood_for_add_subs)
         elif self._training_style == 'hard_em':
             most_likely_add_sub_index = log_likelihood_for_add_subs.argmax(dim=-1)
-            log_marginal_likelihood = log_likelihood_for_add_subs.gather(dim=1, index=most_likely_add_sub_index.unsqueeze(-1)).squeeze(dim=-1)
+            log_marginal_likelihood = log_likelihood_for_add_subs.gather(dim=1,
+                                                                         index=most_likely_add_sub_index.unsqueeze(
+                                                                             -1)).squeeze(dim=-1)
         else:
             raise Exception("Illegal training_style")
 
@@ -117,8 +121,8 @@ class ArithmeticHead(Head):
         numbers = []
         for i, (value, sign) in enumerate(zip(original_numbers, predicted_signs)):
             numbers.append({
-                'value': value, 
-                'sign': sign, 
+                'value': value,
+                'sign': sign,
                 'is_special': i < len(self._special_numbers)
             })
         if number_indices[-1][0] == -1:
@@ -133,7 +137,7 @@ class ArithmeticHead(Head):
         return answer_dict
 
     def _get_mask(self, number_indices: torch.LongTensor, with_special_numbers: bool) -> torch.LongTensor:
-        number_mask = (number_indices[:,:,0].long() != -1).long()
+        number_mask = (number_indices[:, :, 0].long() != -1).long()
         if with_special_numbers and self._num_special_numbers > 0:
             mask = torch.ones((number_indices.shape[0], self._num_special_numbers), device=number_indices.device).long()
             number_mask = torch.cat([mask, number_mask], -1)

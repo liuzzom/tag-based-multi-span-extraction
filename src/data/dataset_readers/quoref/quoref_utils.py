@@ -1,10 +1,13 @@
 from enum import Enum
 
+
 class AnswerType(Enum):
     SINGLE_SPAN = 'single_span'
     MULTI_SPAN = 'multiple_span'
 
+
 ALL_ANSWER_TYPES = [AnswerType.SINGLE_SPAN.value, AnswerType.MULTI_SPAN.value]
+
 
 def get_answer_type(answer):
     if answer:
@@ -14,6 +17,7 @@ def get_answer_type(answer):
             return AnswerType.MULTI_SPAN.value
     else:
         return None
+
 
 def standardize_dataset(dataset, standardize_text):
     for article in dataset['data']:

@@ -9,19 +9,23 @@ from word2number.w2n import word_to_num
 from src.data.fields.labels_field import LabelsField
 from allennlp.data.fields import ListField
 
+
 class AnswerType(Enum):
     SINGLE_SPAN = 'single_span'
     MULTI_SPAN = 'multiple_span'
     NUMBER = 'number'
     DATE = 'date'
 
+
 class AnswerAccessor(Enum):
     SPAN = 'spans'
     NUMBER = 'number'
     DATE = 'date'
 
+
 SPAN_ANSWER_TYPES = [AnswerType.SINGLE_SPAN.value, AnswerType.MULTI_SPAN.value]
 ALL_ANSWER_TYPES = SPAN_ANSWER_TYPES + [AnswerType.NUMBER.value, AnswerType.DATE.value]
+
 
 def get_answer_type(answer):
     if answer['number']:
@@ -34,6 +38,7 @@ def get_answer_type(answer):
         return AnswerType.DATE.value
     else:
         return None
+
 
 def get_number_from_word(word):
     punctuation = string.punctuation.replace('-', '')
@@ -79,6 +84,7 @@ def get_number_from_word(word):
                     return None
     return number
 
+
 def extract_number_occurrences(number_extraction_tokens, alignment):
     number_occurrences = []
     for i, token in enumerate(number_extraction_tokens):
@@ -90,6 +96,7 @@ def extract_number_occurrences(number_extraction_tokens, alignment):
                 'indices': alignment[i]
             })
     return number_occurrences
+
 
 def clipped_passage_num(number_occurrences_in_passage, clipped_length):
     if not number_occurrences_in_passage or number_occurrences_in_passage[-1]['indices'][0] < clipped_length:
@@ -103,11 +110,12 @@ def clipped_passage_num(number_occurrences_in_passage, clipped_length):
             lo = mid + 1
         else:
             hi = mid
-    
+
     last_number_occurrence = number_occurrences_in_passage[lo - 1]
     last_number_occurrence['indices'] = [index for index in last_number_occurrence['indices'] if index < clipped_length]
 
     return number_occurrences_in_passage[:lo]
+
 
 def get_target_numbers(answer_texts):
     target_numbers = []
@@ -116,6 +124,7 @@ def get_target_numbers(answer_texts):
         if number is not None:
             target_numbers.append(number)
     return target_numbers
+
 
 def standardize_dataset(dataset, standardize_text):
     for passage_info in dataset.values():
@@ -134,6 +143,7 @@ def standardize_dataset(dataset, standardize_text):
                         validated_answer['spans'] = [standardize_text(span) for span in validated_answer['spans']]
     return dataset
 
+
 def standardize_dataset_new(dataset, standardize_text):
     # The idea is to save the original fields.
     # The standardized fields will be used for everything except for the evaluation.
@@ -150,8 +160,10 @@ def standardize_dataset_new(dataset, standardize_text):
             if 'validated_answers' in qa_pair:
                 for validated_answer in qa_pair['validated_answers']:
                     if 'spans' in answer:
-                        validated_answer['standardized_spans'] = [standardize_text(span).strip() for span in validated_answer['spans']]
+                        validated_answer['standardized_spans'] = [standardize_text(span).strip() for span in
+                                                                  validated_answer['spans']]
     return dataset
+
 
 def extract_answer_info_from_annotation(answer_annotation: Dict[str, Any]) -> Tuple[str, List[str]]:
     # From allennlp's DropReader.
@@ -182,15 +194,17 @@ def extract_answer_info_from_annotation(answer_annotation: Dict[str, Any]) -> Tu
     elif answer_type == "date":
         # answer_content is a dict with "month", "day", "year" as the keys
         date_tokens = [answer_content[key]
-                        for key in ["month", "day", "year"] if key in answer_content and answer_content[key]]
+                       for key in ["month", "day", "year"] if key in answer_content and answer_content[key]]
         answer_texts = date_tokens
     elif answer_type == "number":
         # answer_content is a string of number
         answer_texts = [answer_content]
     return answer_type, answer_texts
 
+
 def get_number_indices_field(number_occurrences_in_passage: List[Dict[str, Any]]):
     number_token_indices = \
-        [LabelsField(number_occurrence['indices'], padding_value=-1) for number_occurrence in number_occurrences_in_passage]
+        [LabelsField(number_occurrence['indices'], padding_value=-1) for number_occurrence in
+         number_occurrences_in_passage]
 
     return ListField(number_token_indices)

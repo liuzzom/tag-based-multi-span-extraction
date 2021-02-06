@@ -17,6 +17,7 @@ class CustomEmAndF1(Metric):
     evaluator (which has special handling for numbers and for questions with multiple answer spans,
     among other things).
     """
+
     def __init__(self, dataset_name='drop') -> None:
         self._dataset_name = dataset_name
 
@@ -40,12 +41,14 @@ class CustomEmAndF1(Metric):
         """
         self.call(prediction, ground_truths)
 
-    def call(self, prediction: Union[str, List], ground_truths: List, predicting_head: str = None) -> Tuple[Tuple[float, float], Dict[str, Any]]:
-        ground_truth_answer_strings, ground_truth_answer_types = list(zip(*[self.annotation_to_answer_and_type(annotation) for annotation in ground_truths]))
+    def call(self, prediction: Union[str, List], ground_truths: List, predicting_head: str = None) -> Tuple[
+        Tuple[float, float], Dict[str, Any]]:
+        ground_truth_answer_strings, ground_truth_answer_types = list(
+            zip(*[self.annotation_to_answer_and_type(annotation) for annotation in ground_truths]))
         (exact_match, f1_score), maximizing_ground_truth_index = self.metric_max_over_ground_truths(
-                drop_em_and_f1,
-                prediction,
-                ground_truth_answer_strings
+            drop_em_and_f1,
+            prediction,
+            ground_truth_answer_strings
         )
         self._total_em += exact_match
         self._total_f1 += f1_score
@@ -61,13 +64,14 @@ class CustomEmAndF1(Metric):
 
     def annotation_to_answer_and_type(self, annotation) -> Tuple[Tuple[str, ...], str]:
         if self._dataset_name == 'quoref':
-            return answer_json_to_strings(annotation) # because we use a dropified version
+            return answer_json_to_strings(annotation)  # because we use a dropified version
         else:
             return answer_json_to_strings(annotation)
-        
 
     @overrides
-    def get_metric(self, reset: bool = False) -> Tuple[Tuple[float, float], Dict[str, Dict[str, Tuple[float, float, int]]], Dict[str, Tuple[float, float, int]], Dict[str, Tuple[float, float, int]]]:
+    def get_metric(self, reset: bool = False) -> Tuple[
+        Tuple[float, float], Dict[str, Dict[str, Tuple[float, float, int]]], Dict[str, Tuple[float, float, int]], Dict[
+            str, Tuple[float, float, int]]]:
         """
         Returns
         -------
@@ -76,7 +80,7 @@ class CustomEmAndF1(Metric):
         """
         exact_match = self._total_em / self._count if self._count > 0 else 0
         f1_score = self._total_f1 / self._count if self._count > 0 else 0
-        
+
         scores_per_answer_type_and_head = defaultdict(lambda: {})
         scores_per_answer_type = {}
         scores_per_head = {}
@@ -102,12 +106,12 @@ class CustomEmAndF1(Metric):
                 type_head_exact_match = self._answer_type_head_em[answer_type][head] / count
                 type_head_f1_score = self._answer_type_head_f1[answer_type][head] / count
                 scores_per_answer_type_and_head[answer_type][head] = type_head_exact_match, type_head_f1_score, count
-            
+
             scores_per_answer_type[answer_type] = type_em / type_count, type_f1 / type_count, type_count
 
         for head, count in count_per_head.items():
             scores_per_head[head] = em_per_head[head] / count, f1_per_head[head] / count, count
-        
+
         if reset:
             self.reset()
         return (exact_match, f1_score), scores_per_answer_type_and_head, scores_per_answer_type, scores_per_head
@@ -120,10 +124,9 @@ class CustomEmAndF1(Metric):
         self._answer_type_head_em = defaultdict(lambda: defaultdict(float))
         self._answer_type_head_f1 = defaultdict(lambda: defaultdict(float))
         self._answer_type_head_count = defaultdict(lambda: defaultdict(int))
-    
+
     def __str__(self):
         return f"CustomEmAndF1(em={self._total_em}, f1={self._total_f1}, _answer_type_head_em={self._answer_type_head_em}, _answer_type_head_count={self._answer_type_head_count})"
-
 
     @staticmethod
     def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):

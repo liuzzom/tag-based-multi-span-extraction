@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, Any, List, Union, Optional
 
-import numpy as np 
+import numpy as np
 import torch
 
 from itertools import product
@@ -13,6 +13,7 @@ from allennlp.modules import FeedForward
 from src.modules.heads.head import Head
 from src.modules.utils.viterbi_decoding import allowed_transitions, viterbi_tags
 from src.modules.utils.decoding_utils import decode_token_spans, get_token_context
+
 
 @Head.register('multi_span_head')
 class MultiSpanHead(Head):
@@ -37,7 +38,7 @@ class MultiSpanHead(Head):
         self._training_style = training_style
         self._labels = labels
 
-        assert(labels['O'] == 0) # must have O as 0 as there are assumptions about it
+        assert (labels['O'] == 0)  # must have O as 0 as there are assumptions about it
         self._labels_scheme = ''.join(sorted(labels.keys()))
         if self._labels_scheme == 'BILOU':
             self._labels_scheme = 'BIOUL'
@@ -100,23 +101,23 @@ class MultiSpanHead(Head):
         seq_len = token_representations.shape[-1]
 
         mask = torch.zeros((batch_size, num_wordpieces, seq_len), device=wordpiece_indices.device).long().scatter(
-                    2, 
-                    wordpiece_indices, 
-                    torch.ones(wordpiece_indices.shape, device=wordpiece_indices.device).long())
-        mask[:,:,0] = 0
+            2,
+            wordpiece_indices,
+            torch.ones(wordpiece_indices.shape, device=wordpiece_indices.device).long())
+        mask[:, :, 0] = 0
 
         expanded_token_representations = token_representations.unsqueeze(1).repeat(1, num_wordpieces, 1, 1)
 
-        #clamped_wordpiece_indices = 
+        # clamped_wordpiece_indices =
 
     def gold_log_marginal_likelihood(self,
-                                 gold_answer_representations: Dict[str, torch.LongTensor],
-                                 log_probs: torch.LongTensor,
-                                 question_and_passage_mask: torch.LongTensor,
-                                 passage_mask: torch.LongTensor,
-                                 first_wordpiece_mask: torch.LongTensor,
-                                 is_bio_mask: torch.LongTensor,
-                                 **kwargs: Any):
+                                     gold_answer_representations: Dict[str, torch.LongTensor],
+                                     log_probs: torch.LongTensor,
+                                     question_and_passage_mask: torch.LongTensor,
+                                     passage_mask: torch.LongTensor,
+                                     first_wordpiece_mask: torch.LongTensor,
+                                     is_bio_mask: torch.LongTensor,
+                                     **kwargs: Any):
         mask = self._get_mask(question_and_passage_mask, passage_mask, first_wordpiece_mask)
 
         gold_bio_seqs = self._get_gold_answer(gold_answer_representations, log_probs, mask)
@@ -149,12 +150,12 @@ class MultiSpanHead(Head):
         masked_log_probs = log_probs[masked_indices]
 
         if prediction_method == 'viterbi':
-            top_two_masked_predicted_tags = torch.Tensor(viterbi_tags(masked_log_probs.unsqueeze(0), 
-                                                              transitions=self._transitions, 
-                                                              constraint_mask=self._constraint_mask, top_k=2))
-            masked_predicted_tags = top_two_masked_predicted_tags[0,0,:]
+            top_two_masked_predicted_tags = torch.Tensor(viterbi_tags(masked_log_probs.unsqueeze(0),
+                                                                      transitions=self._transitions,
+                                                                      constraint_mask=self._constraint_mask, top_k=2))
+            masked_predicted_tags = top_two_masked_predicted_tags[0, 0, :]
             if masked_predicted_tags.sum(dim=-1) == 0:
-                masked_predicted_tags = top_two_masked_predicted_tags[0,1,:]
+                masked_predicted_tags = top_two_masked_predicted_tags[0, 1, :]
         elif prediction_method == 'argmax':
             masked_predicted_tags = torch.argmax(masked_log_probs, dim=-1)
         else:
@@ -164,12 +165,12 @@ class MultiSpanHead(Head):
 
         retrying = False
         while True:
-            spans_text, spans_indices = self._decode_spans_from_tags(masked_predicted_tags, masked_qp_indices, 
-                                                            qp_tokens, question_passage_wordpieces,
-                                                            p_text, q_text)
-            if (not retrying and len(spans_text) == 0 and prediction_method=='argmax'):
+            spans_text, spans_indices = self._decode_spans_from_tags(masked_predicted_tags, masked_qp_indices,
+                                                                     qp_tokens, question_passage_wordpieces,
+                                                                     p_text, q_text)
+            if (not retrying and len(spans_text) == 0 and prediction_method == 'argmax'):
                 retrying = True
-                max_start_index = torch.argmax(masked_log_probs[:,self._span_start_label], dim=0)
+                max_start_index = torch.argmax(masked_log_probs[:, self._span_start_label], dim=0)
                 masked_predicted_tags[max_start_index] = self._span_start_label
             else:
                 break
@@ -200,23 +201,30 @@ class MultiSpanHead(Head):
                 # TODO: verify correctness (Elad)
 
                 full_bio = span_bio_labels
-                
+
                 if self._generation_top_k > 0:
-                    most_likely_predictions, _ = viterbi_decode(log_probs.cpu(), self._bio_allowed_transitions, top_k=self._generation_top_k)
+                    most_likely_predictions, _ = viterbi_decode(log_probs.cpu(), self._bio_allowed_transitions,
+                                                                top_k=self._generation_top_k)
                     most_likely_predictions = torch.FloatTensor(most_likely_predictions).to(log_probs.device)
                     # ^ Should be converted to tensor
 
                     most_likely_predictions = most_likely_predictions * mask.unsqueeze(1)
-                    
-                    generated_list_of_bios = self._filter_correct_predictions(most_likely_predictions, answer_as_text_to_disjoint_bios, full_bio)
 
-                    is_pregenerated_answer_format_mask = (answer_as_list_of_bios.sum((1, 2)) > 0).unsqueeze(-1).unsqueeze(-1).long()
-                    bio_seqs = torch.cat((answer_as_list_of_bios, (generated_list_of_bios * (1 - is_pregenerated_answer_format_mask))), dim=1)
+                    generated_list_of_bios = self._filter_correct_predictions(most_likely_predictions,
+                                                                              answer_as_text_to_disjoint_bios, full_bio)
+
+                    is_pregenerated_answer_format_mask = (answer_as_list_of_bios.sum((1, 2)) > 0).unsqueeze(
+                        -1).unsqueeze(-1).long()
+                    bio_seqs = torch.cat(
+                        (answer_as_list_of_bios, (generated_list_of_bios * (1 - is_pregenerated_answer_format_mask))),
+                        dim=1)
 
                     bio_seqs = self._add_full_bio(bio_seqs, full_bio)
                 else:
                     is_pregenerated_answer_format_mask = (answer_as_list_of_bios.sum((1, 2)) > 0).long()
-                    bio_seqs = torch.cat((answer_as_list_of_bios, (full_bio * (1 - is_pregenerated_answer_format_mask).unsqueeze(-1)).unsqueeze(1)), dim=1)
+                    bio_seqs = torch.cat((answer_as_list_of_bios,
+                                          (full_bio * (1 - is_pregenerated_answer_format_mask).unsqueeze(-1)).unsqueeze(
+                                              1)), dim=1)
             else:
                 bio_seqs = answer_as_list_of_bios
 
@@ -231,7 +239,7 @@ class MultiSpanHead(Head):
         # Shape: (batch_size, # of correct sequences, seq_length, 3)
         # duplicate log_probs for each gold bios sequence
         expanded_log_probs = log_probs.unsqueeze(1).expand(-1, bio_seqs.size()[1], -1, -1)
-        
+
         # get the log-likelihood per each sequence index
         # Shape: (batch_size, # of correct sequences, seq_length)
         log_likelihoods = \
@@ -251,15 +259,15 @@ class MultiSpanHead(Head):
         return log_marginal_likelihood
 
     def _get_most_likely_likelihood(self,
-                             bio_seqs: torch.LongTensor,
-                             log_probs: torch.LongTensor):
+                                    bio_seqs: torch.LongTensor,
+                                    log_probs: torch.LongTensor):
         # bio_seqs - Shape: (batch_size, # of correct sequences, seq_length)
         # log_probs - Shape: (batch_size, seq_length, 3)
 
         # Shape: (batch_size, # of correct sequences, seq_length, 3)
         # duplicate log_probs for each gold bios sequence
         expanded_log_probs = log_probs.unsqueeze(1).expand(-1, bio_seqs.size()[1], -1, -1)
-        
+
         # get the log-likelihood per each sequence index
         # Shape: (batch_size, # of correct sequences, seq_length)
         log_likelihoods = \
@@ -277,9 +285,9 @@ class MultiSpanHead(Head):
 
         return sequences_log_likelihoods.gather(dim=1, index=most_likely_sequence_index.unsqueeze(-1)).squeeze(dim=-1)
 
-    def _filter_correct_predictions(self, 
-                                    predictions: torch.LongTensor, 
-                                    answer_as_text_to_disjoint_bios: torch.LongTensor, 
+    def _filter_correct_predictions(self,
+                                    predictions: torch.LongTensor,
+                                    answer_as_text_to_disjoint_bios: torch.LongTensor,
                                     full_bio: torch.LongTensor):
         texts_count = answer_as_text_to_disjoint_bios.size()[1]
         spans_count = answer_as_text_to_disjoint_bios.size()[2]
@@ -289,12 +297,16 @@ class MultiSpanHead(Head):
         expanded_answer_as_text_to_disjoint_bios = answer_as_text_to_disjoint_bios.unsqueeze(1)
         expanded_full_bio = full_bio.unsqueeze(1).unsqueeze(-2).unsqueeze(-2)
 
-        disjoint_intersections = (expanded_predictions == expanded_answer_as_text_to_disjoint_bios) & (expanded_answer_as_text_to_disjoint_bios != 0)
+        disjoint_intersections = (expanded_predictions == expanded_answer_as_text_to_disjoint_bios) & (
+                    expanded_answer_as_text_to_disjoint_bios != 0)
         some_intersection = disjoint_intersections.sum(-1) > 0
-        only_full_intersections = (((expanded_answer_as_text_to_disjoint_bios != 0) - disjoint_intersections).sum(-1) == 0) & (expanded_answer_as_text_to_disjoint_bios.sum(-1) > 0)
-        valid_texts = (((some_intersection ^ only_full_intersections)).sum(-1) == 0) & (only_full_intersections.sum(-1) > 0)
+        only_full_intersections = (((expanded_answer_as_text_to_disjoint_bios != 0) - disjoint_intersections).sum(
+            -1) == 0) & (expanded_answer_as_text_to_disjoint_bios.sum(-1) > 0)
+        valid_texts = (((some_intersection ^ only_full_intersections)).sum(-1) == 0) & (
+                    only_full_intersections.sum(-1) > 0)
         correct_mask = ((valid_texts == 1).prod(-1) != 0).long()
-        correct_mask &= (((expanded_full_bio != expanded_predictions) & (expanded_predictions != 0)).sum((-1, -2, -3)) == 0).long()
+        correct_mask &= (((expanded_full_bio != expanded_predictions) & (expanded_predictions != 0)).sum(
+            (-1, -2, -3)) == 0).long()
 
         return predictions * correct_mask.unsqueeze(-1)
 
@@ -307,9 +319,9 @@ class MultiSpanHead(Head):
 
         return torch.cat((correct_most_likely_predictions, (full_bio * not_added.unsqueeze(-1)).unsqueeze(1)), dim=1)
 
-    def _decode_spans_from_tags(self, masked_tags, masked_qp_indices, 
-                            qp_tokens, qp_wordpieces, 
-                            passage_text, question_text):
+    def _decode_spans_from_tags(self, masked_tags, masked_qp_indices,
+                                qp_tokens, qp_wordpieces,
+                                passage_text, question_text):
         """
         decoding_style: str - The options are:
                     "single_word_representation" - Each word's wordpieces are aggregated somehow.
@@ -340,7 +352,7 @@ class MultiSpanHead(Head):
             if token_index in ingested_token_indices:
                 continue
 
-            if decoding_style == 'single_word_representation' or decoding_style =='at_least_one':
+            if decoding_style == 'single_word_representation' or decoding_style == 'at_least_one':
                 tokens = [qp_tokens[j] for j in qp_wordpieces[token_index]]
                 token_indices = qp_wordpieces[token_index]
             elif decoding_style == 'forget_wordpieces':
@@ -350,10 +362,12 @@ class MultiSpanHead(Head):
                 num_of_prev_wordpieces = len(relevant_wordpieces) - 1
                 if len(relevant_wordpieces) == 1:
                     tokens = [qp_tokens[token_index]]
-                elif (token_index == relevant_wordpieces[-1] and # if token is the last wordpiece
-                    len(ingested_token_indices) >= len(relevant_wordpieces) - 1 # and the number of ingested is at least the number of previous wordpieces
-                    and ingested_token_indices[-num_of_prev_wordpieces:] == relevant_wordpieces[:-1]): # and all the last ingested are exactly the previous wordpieces
-                        tokens = [qp_tokens[j] for j in qp_wordpieces[token_index]]
+                elif (token_index == relevant_wordpieces[-1] and  # if token is the last wordpiece
+                      len(ingested_token_indices) >= len(
+                            relevant_wordpieces) - 1  # and the number of ingested is at least the number of previous wordpieces
+                      and ingested_token_indices[-num_of_prev_wordpieces:] == relevant_wordpieces[
+                                                                              :-1]):  # and all the last ingested are exactly the previous wordpieces
+                    tokens = [qp_tokens[j] for j in qp_wordpieces[token_index]]
                 else:
                     tokens = []
                 token_indices = [token_index]
@@ -477,9 +491,10 @@ class MultiSpanHead(Head):
             if lspans.count(lspan) > 1:
                 lspans.remove(lspan)
                 continue
-                
+
             # remove some kinds of substrings
-            if not any((lspan + ' ' in s or ' ' + lspan in s or lspan + 's' in s or lspan + 'n' in s or (lspan in s and not s.startswith(lspan) and not s.endswith(lspan))) and lspan != s for s in lspans):
+            if not any((lspan + ' ' in s or ' ' + lspan in s or lspan + 's' in s or lspan + 'n' in s or (
+                    lspan in s and not s.startswith(lspan) and not s.endswith(lspan))) and lspan != s for s in lspans):
                 new_spans.append(span)
 
         return new_spans

@@ -1,27 +1,26 @@
-import logging
-
-import numpy as np
 import json
-from overrides import overrides
-from typing import Dict, List, Optional, Tuple, Any
+import logging
 from collections import OrderedDict
+from typing import Dict, List, Optional, Any
 
 from allennlp.common.file_utils import cached_path
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
-from allennlp.data.tokenizers import Token, Tokenizer
-from allennlp.data.instance import Instance
 from allennlp.data.fields import Field, MetadataField
+from allennlp.data.instance import Instance
+from allennlp.data.tokenizers import Token, Tokenizer
+from overrides import overrides
 from tqdm import tqdm
 
-from src.data.dataset_readers.drop.drop_utils import (AnswerType, ALL_ANSWER_TYPES, get_answer_type, 
+from src.data.dataset_readers.answer_field_generators.answer_field_generator import AnswerFieldGenerator
+from src.data.dataset_readers.drop.drop_utils import (ALL_ANSWER_TYPES, get_answer_type,
                                                       standardize_dataset, extract_answer_info_from_annotation)
-from src.data.dataset_readers.utils import standardize_text_simple, standardize_text_advanced
 from src.data.dataset_readers.utils import custom_word_tokenizer, split_tokens_by_hyphen, index_text_to_tokens
 from src.data.dataset_readers.utils import is_pickle_dict_valid, load_pkl, save_pkl
-from src.data.dataset_readers.answer_field_generators.answer_field_generator import AnswerFieldGenerator
+from src.data.dataset_readers.utils import standardize_text_simple, standardize_text_advanced
 from src.data.fields.labels_field import LabelsField
 
 logger = logging.getLogger(__name__)
+
 
 @DatasetReader.register('tbmse_quoref')
 class QuorefReader(DatasetReader):
@@ -32,11 +31,12 @@ class QuorefReader(DatasetReader):
                  old_reader_behavior: bool,
                  lazy: bool = False,
                  is_training: bool = False,
-                 max_instances = -1,
+                 max_instances=-1,
                  answer_types_filter: List[str] = ALL_ANSWER_TYPES,
                  max_pieces: int = 512,
                  uncased: bool = False,
-                 standardize_texts: bool = False, # since we need to use answer_start, we can't modify the text without tracking the changes,
+                 standardize_texts: bool = False,
+                 # since we need to use answer_start, we can't modify the text without tracking the changes,
                  pickle: Dict[str, Any] = {'action': None}):
         super().__init__(lazy)
         self._lazy = lazy
@@ -50,7 +50,7 @@ class QuorefReader(DatasetReader):
 
         self._is_training = is_training
         self._max_instances = max_instances
-        
+
         self._answer_types_filter = answer_types_filter
 
         self._max_pieces = max_pieces
@@ -64,7 +64,7 @@ class QuorefReader(DatasetReader):
             self._pickle['action'] = None
 
         word_tokenizer = custom_word_tokenizer()
-        self._word_tokenize =\
+        self._word_tokenize = \
             lambda text: [token for token in split_tokens_by_hyphen(word_tokenizer.tokenize(text))]
 
     @overrides
@@ -80,7 +80,7 @@ class QuorefReader(DatasetReader):
                 self._pickle['action'] = 'save'
 
         file_path = cached_path(file_path)
-        with open(file_path, encoding = 'utf8') as dataset_file:
+        with open(file_path, encoding='utf8') as dataset_file:
             dataset = json.load(dataset_file)
 
         dataset = standardize_dataset(dataset, self._standardize_text_func)
@@ -123,7 +123,8 @@ class QuorefReader(DatasetReader):
                     original_answer_annotations.append(original_answer)
 
                     # If the standardization deleted characters then we need to adjust answer_start
-                    deletion_indexes = self._standardize_text_func(passage_info['original_passage'], deletions_tracking=True)[1]
+                    deletion_indexes = \
+                        self._standardize_text_func(passage_info['original_passage'], deletions_tracking=True)[1]
                     for span in original_answer:
                         answer_start = span['answer_start']
                         for index in deletion_indexes.keys():
@@ -176,32 +177,38 @@ class QuorefReader(DatasetReader):
         question_wordpieces = self._tokenizer.alignment_to_token_wordpieces(question_alignment)
 
         # Index tokens
-        encoded_inputs = self._tokenizer.encode_plus([token.text for token in question_tokens], [token.text for token in passage_tokens], 
-                                    add_special_tokens=True, max_length=self._max_pieces, 
-                                    truncation_strategy='only_second',
-                                    return_token_type_ids=True,
-                                    return_special_tokens_mask=True)
+        encoded_inputs = self._tokenizer.encode_plus([token.text for token in question_tokens],
+                                                     [token.text for token in passage_tokens],
+                                                     add_special_tokens=True, max_length=self._max_pieces,
+                                                     truncation_strategy='only_second',
+                                                     return_token_type_ids=True,
+                                                     return_special_tokens_mask=True)
         question_passage_token_type_ids = encoded_inputs['token_type_ids']
         question_passage_special_tokens_mask = encoded_inputs['special_tokens_mask']
 
-        question_position = self._tokenizer.get_type_position_in_sequence(0, question_passage_token_type_ids, question_passage_special_tokens_mask)
-        passage_position = self._tokenizer.get_type_position_in_sequence(1, question_passage_token_type_ids, question_passage_special_tokens_mask)
+        question_position = self._tokenizer.get_type_position_in_sequence(0, question_passage_token_type_ids,
+                                                                          question_passage_special_tokens_mask)
+        passage_position = self._tokenizer.get_type_position_in_sequence(1, question_passage_token_type_ids,
+                                                                         question_passage_special_tokens_mask)
         question_passage_tokens, num_of_tokens_per_type = self._tokenizer.convert_to_tokens(encoded_inputs, [
-            {'tokens': question_tokens, 'wordpieces': question_wordpieces, 'position': question_position}, 
+            {'tokens': question_tokens, 'wordpieces': question_wordpieces, 'position': question_position},
             {'tokens': passage_tokens, 'wordpieces': passage_wordpieces, 'position': passage_position}
         ])
 
         # Adjust wordpieces
         question_passage_wordpieces = self._tokenizer.adjust_wordpieces([
-            {'wordpieces': question_wordpieces, 'position': question_position, 'num_of_tokens': num_of_tokens_per_type[0]}, 
+            {'wordpieces': question_wordpieces, 'position': question_position,
+             'num_of_tokens': num_of_tokens_per_type[0]},
             {'wordpieces': passage_wordpieces, 'position': passage_position, 'num_of_tokens': num_of_tokens_per_type[1]}
         ], question_passage_tokens)
 
         # Adjust text index to token index
-        question_text_index_to_token_index = [token_index + question_position for i, token_index in enumerate(question_text_index_to_token_index)
+        question_text_index_to_token_index = [token_index + question_position for i, token_index in
+                                              enumerate(question_text_index_to_token_index)
                                               if token_index < num_of_tokens_per_type[0]]
-        passage_text_index_to_token_index = [token_index + passage_position for i, token_index in enumerate(passage_text_index_to_token_index)
-                                              if token_index < num_of_tokens_per_type[1]]
+        passage_text_index_to_token_index = [token_index + passage_position for i, token_index in
+                                             enumerate(passage_text_index_to_token_index)
+                                             if token_index < num_of_tokens_per_type[1]]
 
         # Truncation-related code
         encoded_passage_tokens_length = num_of_tokens_per_type[1]
@@ -213,7 +220,6 @@ class QuorefReader(DatasetReader):
                 max_passage_length = -1
         else:
             max_passage_length = 0
-
 
         fields: Dict[str, Field] = {}
 
@@ -262,9 +268,11 @@ class QuorefReader(DatasetReader):
                 'passage_text_index_to_token_index': passage_text_index_to_token_index,
                 'answer_texts': answer_texts,
                 'gold_indexes': gold_indexes,
-                'answer_type': answer_type, # TODO: Elad - Probably temporary, used to mimic the old reader's behavior
-                'is_training': self._is_training, # TODO: Elad - Probably temporary, used to mimic the old reader's behavior
-                'old_reader_behavior': self._old_reader_behavior # TODO: Elad - temporary, used to mimic the old reader's behavior
+                'answer_type': answer_type,  # TODO: Elad - Probably temporary, used to mimic the old reader's behavior
+                'is_training': self._is_training,
+                # TODO: Elad - Probably temporary, used to mimic the old reader's behavior
+                'old_reader_behavior': self._old_reader_behavior
+                # TODO: Elad - temporary, used to mimic the old reader's behavior
             }
 
             answer_generator_names = None
@@ -285,5 +293,5 @@ class QuorefReader(DatasetReader):
                 return None
 
         fields['metadata'] = MetadataField(metadata)
-        
+
         return Instance(fields)

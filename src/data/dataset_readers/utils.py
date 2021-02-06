@@ -1,21 +1,20 @@
-from typing import List, Tuple, Dict
 import html
-import re
-import sys
 import os
 import pickle
+import re
+import sys
 import unicodedata
+from typing import List, Tuple
 
-from spacy.tokenizer import Tokenizer
-from spacy.lang.en import English
-
-from allennlp.data.tokenizers import Token
+from allennlp.data.dataset_readers.reading_comprehension.util import STRIPPED_CHARACTERS
 from allennlp.data.tokenizers import SpacyTokenizer
-from allennlp.data.dataset_readers.reading_comprehension.drop import DropReader
-from allennlp.data.dataset_readers.reading_comprehension.util import split_tokens_by_hyphen, STRIPPED_CHARACTERS
+from allennlp.data.tokenizers import Token
+from spacy.tokenizer import Tokenizer
 
-whitespaces = re.findall(r'\s', u''.join(chr(c) for c in range(sys.maxunicode+1)), re.UNICODE)
-empty_chars = ['\u200b', '\ufeff', '\u2061'] # zero width space, byte order mark
+whitespaces = re.findall(r'\s', u''.join(chr(c) for c in range(sys.maxunicode + 1)), re.UNICODE)
+empty_chars = ['\u200b', '\ufeff', '\u2061']  # zero width space, byte order mark
+
+
 def standardize_text_simple(text, deletions_tracking=False):
     for whitespace in whitespaces:
         text = text.replace(whitespace, ' ')
@@ -28,9 +27,10 @@ def standardize_text_simple(text, deletions_tracking=False):
     for empty_char in empty_chars:
         text = text.replace(empty_char, '')
 
-    text = ' '.join(text.split()) # use ' ' for all spaces and replace sequence of spaces with single space
+    text = ' '.join(text.split())  # use ' ' for all spaces and replace sequence of spaces with single space
 
     return text if not deletions_tracking else (text, deletion_indexes)
+
 
 def track_deletions(text, deletion_indexes):
     """
@@ -59,6 +59,7 @@ def track_deletions(text, deletion_indexes):
             space_sequence = False
             length = 0
 
+
 def standardize_text_advanced(text, deletions_tracking=False):
     text = html.unescape(text)
     text = standardize_text_simple(text)
@@ -81,14 +82,16 @@ def standardize_text_advanced(text, deletions_tracking=False):
 
     return text if not deletions_tracking else (text, {})
 
+
 def custom_word_tokenizer():
-    #tokenizer_exceptions = English().Defaults.tokenizer_exceptions
+    # tokenizer_exceptions = English().Defaults.tokenizer_exceptions
     word_tokenizer = SpacyTokenizer()
-    word_tokenizer.spacy.tokenizer = Tokenizer(vocab=word_tokenizer.spacy.tokenizer.vocab, rules={}, 
-                                               prefix_search=word_tokenizer.spacy.tokenizer.prefix_search, 
-                                               suffix_search=word_tokenizer.spacy.tokenizer.suffix_search, 
+    word_tokenizer.spacy.tokenizer = Tokenizer(vocab=word_tokenizer.spacy.tokenizer.vocab, rules={},
+                                               prefix_search=word_tokenizer.spacy.tokenizer.prefix_search,
+                                               suffix_search=word_tokenizer.spacy.tokenizer.suffix_search,
                                                infix_finditer=word_tokenizer.spacy.tokenizer.infix_finditer)
     return word_tokenizer
+
 
 def split_token_by_delimiter(token: Token, delimiter: str) -> List[Token]:
     """
@@ -108,6 +111,7 @@ def split_token_by_delimiter(token: Token, delimiter: str) -> List[Token]:
         return split_tokens
     else:
         return [token]
+
 
 def split_tokens_by_hyphen(tokens: List[Token]) -> List[Token]:
     """
@@ -133,6 +137,7 @@ def split_tokens_by_hyphen(tokens: List[Token]) -> List[Token]:
 
     return new_tokens
 
+
 def run_strip_accents(text):
     """
     From tokenization_bert.py by huggingface/transformers.
@@ -147,6 +152,7 @@ def run_strip_accents(text):
         output.append(char)
     return "".join(output)
 
+
 def find_all(substr, text):
     matches = []
     start = 0
@@ -157,6 +163,7 @@ def find_all(substr, text):
         matches.append(start)
         start += 1
     return matches
+
 
 def index_text_to_tokens(text, tokens):
     text_index_to_token_index = []
@@ -172,7 +179,7 @@ def index_text_to_tokens(text, tokens):
             if next_index == index and next_token_index == len(tokens) - 1:
                 next_token_index += 1
                 next_index = len(text)
-            
+
             if i >= index and i < next_index:
                 text_index_to_token_index.append(token_index)
                 break
@@ -186,19 +193,20 @@ def index_text_to_tokens(text, tokens):
                 else:
                     next_token_index += 1
                     next_index = len(text)
-                if (next_token_index > len(tokens)):
+                if next_token_index > len(tokens):
                     raise Exception("Error in " + text)
     return text_index_to_token_index
 
-def find_valid_spans(text: str, answer_texts: List[str], 
-                     text_index_to_token_index: List[int], 
+
+def find_valid_spans(text: str, answer_texts: List[str],
+                     text_index_to_token_index: List[int],
                      tokens: List[Token], wordpieces: List[List[int]],
                      gold_indexes: List[int]) -> List[Tuple[int, int]]:
     text = text.lower()
     answer_texts_set = set()
     for answer_text in answer_texts:
         option1 = answer_text.lower()
-        option2 = option1.strip(STRIPPED_CHARACTERS) 
+        option2 = option1.strip(STRIPPED_CHARACTERS)
         option3 = run_strip_accents(option1)
         option4 = run_strip_accents(option2)
         answer_texts_set.update([option1, option2, option3, option4])
@@ -207,7 +215,7 @@ def find_valid_spans(text: str, answer_texts: List[str],
     if gold_indexes is not None:
         gold_token_indexes = []
         for gold_index in gold_indexes:
-            if gold_index < len(text_index_to_token_index): # if the gold index was not truncated
+            if gold_index < len(text_index_to_token_index):  # if the gold index was not truncated
                 if text[gold_index] == ' ' and gold_index < len(text_index_to_token_index) - 1:
                     gold_index += 1
                 gold_token_indexes.append(text_index_to_token_index[gold_index])
@@ -219,14 +227,14 @@ def find_valid_spans(text: str, answer_texts: List[str],
             start_token_index = text_index_to_token_index[start_index]
             end_token_index = text_index_to_token_index[start_index + len(answer_text) - 1]
 
-            wordpieces_condition = (wordpieces[start_token_index][0] == start_token_index and 
+            wordpieces_condition = (wordpieces[start_token_index][0] == start_token_index and
                                     wordpieces[end_token_index][-1] == end_token_index)
 
             stripped_answer_text = answer_text.strip(STRIPPED_CHARACTERS)
             stripped_first_token = tokens[start_token_index].lemma_.lower().strip(STRIPPED_CHARACTERS)
             stripped_last_token = tokens[end_token_index].lemma_.lower().strip(STRIPPED_CHARACTERS)
-            text_match_condition = (stripped_answer_text.startswith(stripped_first_token) and 
-                                        stripped_answer_text.endswith(stripped_last_token))
+            text_match_condition = (stripped_answer_text.startswith(stripped_first_token) and
+                                    stripped_answer_text.endswith(stripped_last_token))
 
             gold_index_condition = gold_token_indexes is None or start_token_index in gold_token_indexes
 
@@ -235,6 +243,7 @@ def find_valid_spans(text: str, answer_texts: List[str],
 
     return valid_spans
 
+
 def save_pkl(instances, pickle_dict, is_training):
     if is_pickle_dict_valid(pickle_dict):
         pkl_path = get_pkl_path(pickle_dict, is_training)
@@ -242,15 +251,18 @@ def save_pkl(instances, pickle_dict, is_training):
         with open(pkl_path, 'wb') as dataset_file:
             pickle.dump(instances, dataset_file)
 
+
 def load_pkl(pickle_dict, is_training):
     try:
         with open(get_pkl_path(pickle_dict, is_training), 'rb') as dataset_pkl:
             return pickle.load(dataset_pkl)
-    except Exception as e:
+    except Exception:
         return None
+
 
 def get_pkl_path(pickle_dict, is_training):
     return os.path.join(pickle_dict['path'], f"{pickle_dict['file_name']}_{'train' if is_training else 'dev'}.pkl")
+
 
 def is_pickle_dict_valid(pickle_dict):
     return pickle_dict is not None and 'path' in pickle_dict and 'file_name' in pickle_dict

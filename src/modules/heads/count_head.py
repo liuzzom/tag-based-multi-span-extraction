@@ -7,6 +7,7 @@ from allennlp.modules import FeedForward
 
 from src.modules.heads.head import Head
 
+
 @Head.register('count_head')
 class CountHead(Head):
     def __init__(self,
@@ -35,10 +36,10 @@ class CountHead(Head):
         return output_dict
 
     def gold_log_marginal_likelihood(self,
-                                 gold_answer_representations: Dict[str, torch.LongTensor],
-                                 log_probs: torch.LongTensor,
-                                 number_indices: torch.LongTensor,
-                                 **kwargs: Any):
+                                     gold_answer_representations: Dict[str, torch.LongTensor],
+                                     log_probs: torch.LongTensor,
+                                     number_indices: torch.LongTensor,
+                                     **kwargs: Any):
         answer_as_counts = gold_answer_representations['answer_as_counts']
 
         # Count answers are padded with label -1,
