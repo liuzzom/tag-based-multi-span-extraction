@@ -1,0 +1,740 @@
+{
+    "nfl_2201": {
+        "passage": "To start the season, the Lions traveled south to Tampa, Florida to take on the Tampa Bay Buccaneers. The Lions scored first in the first quarter with a 23-yard field goal by Jason Hanson. The Buccaneers tied it up with a 38-yard field goal by Connor Barth, then took the lead when Aqib Talib intercepted a pass from Matthew Stafford and ran it in 28 yards. The Lions responded with a 28-yard field goal. In the second quarter, Detroit took the lead with a 36-yard touchdown catch by Calvin Johnson, and later added more points when Tony Scheffler caught an 11-yard TD pass. Tampa Bay responded with a 31-yard field goal just before halftime. The second half was relatively quiet, with each team only scoring one touchdown. First, Detroit's Calvin Johnson caught a 1-yard pass in the third quarter. The game's final points came when Mike Williams of Tampa Bay caught a 5-yard pass.  The Lions won their regular season opener for the first time since 2007",
+        "qa_pairs": [
+            {
+                "question": "How many points did the buccaneers need to tie in the first?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "f16c0ee7-f131-4a8b-a6ac-4d275ea68066"
+            },
+            {
+                "question": "How many field goals did the Lions score?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "c9582e03-b01b-42ed-83e0-b90a5334aefa"
+            },
+            {
+                "question": "How long was the Lion's longest field goal?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "28-yard"
+                    ]
+                },
+                "query_id": "f703d43d-73fa-4fda-8913-d81bd5569700"
+            },
+            {
+                "question": "Who caught the touchdown for the fewest yard?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Mike Williams"
+                    ]
+                },
+                "query_id": "2fd4f473-af2b-44ce-929a-20c82fa6be2c"
+            },
+            {
+                "question": "Who caught the shortest touchdown pass?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Calvin Johnson"
+                    ]
+                },
+                "query_id": "6592e06d-4ad6-484f-a9a5-5cb72c76dfee"
+            },
+            {
+                "question": "How many field goals were scored in the first quarter?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "99a50d10-ec43-4040-8c8e-2eb5bafe1906"
+            },
+            {
+                "question": "How many yards was the shortest touchdown scoring play?",
+                "answer": {
+                    "number": "1",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "af0f2cbd-abf2-4570-ae0e-89f335da4f60",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "How many touchdowns were scored in the second quarter?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "c93cd84b-d76c-48e3-b73b-ef1d67003e4b",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "Which player scored the first points of the game for Tampa Bay?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Connor Barth"
+                    ]
+                },
+                "query_id": "a237ff8b-a6a3-4c68-baf8-f883ec5dac7e",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "How many yards Hanson score with in the first?",
+                "answer": {
+                    "number": "23",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "e1afeb0e-9ad7-4733-bcc2-c977344de287",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "How many field goals were made in the first quarter?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [],
+                    "worker_id": "",
+                    "hit_id": ""
+                },
+                "query_id": "2f4bb460-7f65-411f-9cd3-b3653a534942",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "Who threw the first touchdown pass of the game?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Matthew Stafford"
+                    ],
+                    "worker_id": "",
+                    "hit_id": ""
+                },
+                "query_id": "b04a6f58-2860-445b-8770-d309a467fe30",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "How many touchdowns were scored in the 2nd half?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [],
+                    "worker_id": "",
+                    "hit_id": ""
+                },
+                "query_id": "76e0e522-14a7-4073-9138-0f2a7b039333",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "Who caught the longest touchdown reception of the game?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Calvin Johnson"
+                    ],
+                    "worker_id": "",
+                    "hit_id": ""
+                },
+                "query_id": "3810d97f-133b-4433-b615-3d0b1b2da032",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "How many points were scored first?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "33f9f7bd-518b-45ae-86d5-c1475167d54f"
+            }
+        ],
+        "wiki_url": "https://en.wikipedia.org/wiki/2014_Cleveland_Browns"
+    },
+    "nfl_478": {
+        "passage": "Trying to snap a two-game skid, the Bills flew to Gillette Stadium for a Week 3 divisional fight with the New England Patriots.  In the first quarter, QB J. P. Losman was immediately injured on the first offensive play of the game.  He would finish the series, but ended up on the bench for the rest of the game.  After New England took the lead with kicker Stephen Gostkowski's 24-yard field goal, rookie QB Trent Edwards played the rest of the game for Buffalo.  The Bills would get their only score of the game as RB Marshawn Lynch got an 8-yard TD run, and a Rian Lindell extra point put the Bills ahead surprisingly 7-3.  However, in the second quarter, the Patriots were able to open up their running game when Bills rookie standout Paul Posluszny was lost due to a broken arm. This left passing lanes open, and for the rest of the game, the Patriots dominated. QB Tom Brady's 8-yard TD pass to TE Benjamin Watson and a 3-yard TD pass to WR Randy Moss made it 17-7 at the half.  In the third quarter, New England continued its conquest with Brady's 4-yard TD pass to WR Jabar Gaffney and RB Sammy Morris' 4-yard TD run.  In the fourth quarter, the Patriots ended the day with Brady and Moss hooking up with each other again on a 45-yard TD pass.",
+        "qa_pairs": [
+            {
+                "question": "How many games had the Bills won before this game?",
+                "answer": {
+                    "number": "0",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "8d865c44-8b45-42f4-bd6a-65651f363667"
+            },
+            {
+                "question": "Which team scored first?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "New England"
+                    ]
+                },
+                "query_id": "81e9d225-4234-4391-ab00-2488b066d7f8"
+            },
+            {
+                "question": "Which team was losing at the half?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Bills"
+                    ]
+                },
+                "query_id": "c901a338-d8c2-4fe9-acf0-ef7aef137d94"
+            },
+            {
+                "question": "How many quarters  did Trent Edwards play?",
+                "answer": {
+                    "number": "4",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "16916544-1e32-4dc2-affb-924530416d96"
+            },
+            {
+                "question": "How many points did Moss get at the end of the game?",
+                "answer": {
+                    "number": "6",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "3c7eab55-3f16-482a-bae4-f1bb8c99219e"
+            },
+            {
+                "question": "How many field goals were in the game?",
+                "answer": {
+                    "number": "1",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "926aff87-8f52-4c37-a6e1-b9439e1b292d"
+            },
+            {
+                "question": "How many points were scored in the first half?",
+                "answer": {
+                    "number": "24",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "f341fa0a-7df1-4608-b324-a520bdbdf06b"
+            },
+            {
+                "question": "How many yards was the longest pass?",
+                "answer": {
+                    "number": "45",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "ae7c4737-8662-471c-a3be-430ba8a0cd75"
+            },
+            {
+                "question": "Who threw for more touchdowns in the game?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Tom Brady"
+                    ]
+                },
+                "query_id": "1478859c-7be8-4f13-aca3-57c739b9737b"
+            },
+            {
+                "question": "How many touchdowns did Randy Moss catch?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "f8ab82c3-d1f4-46e7-8efd-9928d6d55b59"
+            },
+            {
+                "question": "How many yards for a touchdown did randy moss catch?",
+                "answer": {
+                    "number": "48",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "37cbfb87-8c3f-4095-9a66-8b32bc0cc308"
+            },
+            {
+                "question": "How many points were scored in the first half?",
+                "answer": {
+                    "number": "24",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "2f0a329c-eb28-4b7f-af99-bfcd15456722",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "How many touchdown passes did Brady throw in the second quarter?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "c43e5838-b8d9-4ad3-92a9-5f5b0f1743df",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "How many times did the Bills score in the game?",
+                "answer": {
+                    "number": "1",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "6585df06-0312-4f15-bf64-b3f601f1f30e",
+                "highlights": [],
+                "question_type": []
+            },
+            {
+                "question": "Which players scored exactly 8-yard touchdowns?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Marshawn Lynch",
+                        "Benjamin Watson"
+                    ]
+                },
+                "query_id": "f88ed123-ec60-47d6-822e-3b2e4967beb5",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "How many yards were all Brady's TD passes combined?",
+                "answer": {
+                    "number": "15",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "d33e83dc-41d1-4545-8d27-5a6827c1de8e",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "How many more touchdowns did the Patriots score than the Bills?",
+                "answer": {
+                    "number": "3",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "1c65652a-11c6-43df-a24a-5a4812d2fe2c",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            },
+            {
+                "question": "How many points were scored in the first half?",
+                "answer": {
+                    "number": "24",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "d74aed55-dc80-4c07-a04a-c1ce252d8f5e",
+                "highlights": [],
+                "question_type": [],
+                "validated_answers": [],
+                "expert_answers": []
+            }
+        ],
+        "wiki_url": "https://en.wikipedia.org/wiki/2014_Cleveland_Browns"
+    },
+    "history_690": {
+        "passage": "The French king, John II, had been held captive in England. The Treaty of Br\u00e9tigny set his ransom at 3\u00a0million\u00a0crowns and allowed for hostages to be held in lieu of John. The hostages included two of his sons, several princes and nobles, four inhabitants of Paris, and two citizens from each of the nineteen principal towns of France. While these hostages were held, John returned to France to try and raise funds to pay the ransom. In 1362 John's son Louis of Anjou, a hostage in English-held Calais, escaped captivity. So, with his stand-in hostage gone, John felt honor-bound to return to captivity in England. The French crown had been at odds with Navarre  since 1354, and in 1363 the Navarrese used the captivity of John II in London and the political weakness of the Dauphin to try to seize power. Although there was no formal treaty, Edward III supported the Navarrese moves, particularly as there was a prospect that he might gain control over the northern and western provinces as a consequence. With this in mind, Edward deliberately slowed the peace negotiations. In 1364, John II died in London, while still in honourable captivity. Charles V succeeded him as king of France. On 7 May 1364, one month after the dauphin's accession and three days before his coronation as Charles V, the Navarrese suffered a crushing defeat at the Battle of Cocherel.",
+        "qa_pairs": [
+            {
+                "question": "How many years before Navarrase used the captivity of John II?",
+                "answer": {
+                    "number": "9",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "4c219d65-8fe2-4029-9da0-70f5e2857bdb"
+            },
+            {
+                "question": "What did one of John II's replacements do in captivity?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "escaped captivity"
+                    ]
+                },
+                "query_id": "c420c10d-1384-47f1-9850-ec9269570ca8"
+            },
+            {
+                "question": "How many years was the French crown at odds with Navarre before Charles V succeeded as king?",
+                "answer": {
+                    "number": "9",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "6977dd13-98cc-4bf2-b73b-220f686d69f4"
+            },
+            {
+                "question": "How many more inhabitants of Paris than sons of John II could be hostages held in lieu?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "67e071b5-0839-4f4a-bce2-ff874d068f6b"
+            },
+            {
+                "question": "How many citizens from principal towns in France could be held as hostage in lieu of John II?",
+                "answer": {
+                    "number": "18",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "90539a00-6d82-49da-aa9d-5c92e2d556f7"
+            },
+            {
+                "question": "How many years passed betwwen the French dispute with Navarre and the leverage of the captivity of John II?",
+                "answer": {
+                    "number": "9",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "531424d7-ffc1-4a01-8a04-d93b77393410"
+            },
+            {
+                "question": "How many years after John II returned to captivity did he die?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "8aa1518e-e932-4286-81a2-fd7709e92085"
+            },
+            {
+                "question": "John II died how many years after his son was taken hostage in English-held Calais?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "56999bdc-3454-4179-9c5d-be56980ed73d"
+            },
+            {
+                "question": "Dauphin to try to seize power how many years before John II died in London?",
+                "answer": {
+                    "number": "1",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "d819dd7f-6e59-482d-8262-0bcc8f4db810"
+            },
+            {
+                "question": "How many groups were held hostage in lieu of John II?",
+                "answer": {
+                    "number": "4",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "6b2f6674-fb72-4377-8786-b6d2723ad584"
+            },
+            {
+                "question": "How many years passed between the French being at odds with Navarre and the Navarrese attempting to seize power?",
+                "answer": {
+                    "number": "9",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "1c2d273f-80c7-4909-9516-33363cc3ad96"
+            },
+            {
+                "question": "Was John in captivity when he died?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "while still in honourable captivity"
+                    ]
+                },
+                "query_id": "ba98b224-4aa3-409c-8cf3-c7b811ec7877"
+            },
+            {
+                "question": "Who was king first, John II or Charles V?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "John II"
+                    ]
+                },
+                "query_id": "c5410346-090c-4882-90bd-c822251c4fbd"
+            },
+            {
+                "question": "Which happened first, the Treaty of Br\u00e9tigny or the Battle of Cocherel?",
+                "answer": {
+                    "number": "",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": [
+                        "Treaty of Br\u00e9tigny"
+                    ]
+                },
+                "query_id": "629b40e4-cdb9-41e5-8674-98ee98e51003"
+            },
+            {
+                "question": "At least how many people were held hostage in place of John II?",
+                "answer": {
+                    "number": "44",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "340b0f7f-f53e-4fa1-951a-1735f4a388ec"
+            },
+            {
+                "question": "How many years did John II live after returning to captivity in Ingland in 1362?",
+                "answer": {
+                    "number": "2",
+                    "date": {
+                        "day": "",
+                        "month": "",
+                        "year": ""
+                    },
+                    "spans": []
+                },
+                "query_id": "624cb026-54d2-4572-af00-7e02bdb2e8a7"
+            }
+        ],
+        "wiki_url": "https://en.wikipedia.org/wiki/2014_Cleveland_Browns"
+    }
+}

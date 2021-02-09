@@ -1,27 +1,25 @@
-import logging
-
-import numpy as np
 import json
-from overrides import overrides
-from typing import Dict, List, Optional, Tuple, Any
+import logging
 from collections import OrderedDict
+from typing import Dict, List, Optional, Any
 
 from allennlp.common.file_utils import cached_path
 from allennlp.data.dataset_readers.dataset_reader import DatasetReader
-from allennlp.data.tokenizers import Token, Tokenizer
-from allennlp.data.instance import Instance
 from allennlp.data.fields import Field, MetadataField
+from allennlp.data.instance import Instance
+from allennlp.data.tokenizers import Token, Tokenizer
+from overrides import overrides
 from tqdm import tqdm
 
-from src.data.dataset_readers.drop.drop_utils import (AnswerType, AnswerAccessor, SPAN_ANSWER_TYPES,
-                                                      ALL_ANSWER_TYPES, get_answer_type, standardize_dataset,
-                                                      extract_answer_info_from_annotation)
-from src.data.dataset_readers.utils import standardize_text_simple, standardize_text_advanced
-from src.data.dataset_readers.utils import custom_word_tokenizer, split_tokens_by_hyphen, index_text_to_tokens
-from src.data.dataset_readers.utils import is_pickle_dict_valid, load_pkl, save_pkl
 from src.data.dataset_readers.answer_field_generators.answer_field_generator import AnswerFieldGenerator
+from src.data.dataset_readers.drop.drop_utils import (AnswerAccessor, ALL_ANSWER_TYPES, get_answer_type,
+                                                      standardize_dataset,
+                                                      extract_answer_info_from_annotation)
 from src.data.dataset_readers.drop.drop_utils import (extract_number_occurrences, clipped_passage_num,
                                                       get_number_indices_field)
+from src.data.dataset_readers.utils import custom_word_tokenizer, split_tokens_by_hyphen, index_text_to_tokens
+from src.data.dataset_readers.utils import is_pickle_dict_valid, load_pkl, save_pkl
+from src.data.dataset_readers.utils import standardize_text_simple, standardize_text_advanced
 from src.data.fields.labels_field import LabelsField
 
 logger = logging.getLogger(__name__)
