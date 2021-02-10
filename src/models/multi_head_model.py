@@ -17,6 +17,23 @@ logger = logging.getLogger(__name__)
 
 @Model.register('multi_head')
 class MultiHeadModel(Model):
+    """
+    This class implements the multi-head model described in the paper
+
+    Attributes
+    ---------
+        vocab: Vocabulary,
+        pretrained_model: str,
+        heads: Dict[str, Head],
+        dataset_name,
+        head_predictor: Optional[FeedForward] = None,
+        passage_summary_vector_module: Optional[FeedForward] = None,
+        question_summary_vector_module: Optional[FeedForward] = None,
+        training_evaluation: bool = True,
+        output_all_answers: bool = False,
+        initializer: InitializerApplicator = InitializerApplicator(),
+        regularizer: Optional[RegularizerApplicator] = None
+    """
     def __init__(self,
                  vocab: Vocabulary,
                  pretrained_model: str,
@@ -29,21 +46,14 @@ class MultiHeadModel(Model):
                  output_all_answers: bool = False,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
-        print("Constructor called...")
-        print("\tSuper Constructor called...")
         super().__init__(vocab, regularizer)
-        print("\tSuper Constructor ended...")
 
-        print("\tPretrained called...")
+
         self._pretrained_model = pretrained_model
-        print("\tTransformer Model called...")
         self._transformers_model = AutoModel.from_pretrained(pretrained_model)
 
-        print("\tHead called...")
         self._heads = torch.nn.ModuleDict(heads)
-        print("\tHead Predictor called...")
         self._head_predictor = head_predictor
-        print("\tSummary Vectors called...")
         self._passage_summary_vector_module = passage_summary_vector_module
         self._question_summary_vector_module = question_summary_vector_module
 
@@ -138,8 +148,8 @@ class MultiHeadModel(Model):
         # Shape: (batch_size, seqlen)
         passage_mask = question_passage_token_type_ids * question_passage_pad_mask * question_passage_special_tokens_mask
         # Shape: (batch_size, seqlen)
-        question_mask = (
-                                    1 - question_passage_token_type_ids) * question_passage_pad_mask * question_passage_special_tokens_mask
+        question_mask = \
+            (1 - question_passage_token_type_ids) * question_passage_pad_mask * question_passage_special_tokens_mask
         question_and_passage_mask = question_mask | passage_mask
 
         # Shape: (batch_size, seqlen, bert_dim)
