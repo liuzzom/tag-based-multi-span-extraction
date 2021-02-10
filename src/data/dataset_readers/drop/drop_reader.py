@@ -148,7 +148,6 @@ class DropReader(DatasetReader):
         instances = []
         for passage_id, passage_info in tqdm(dataset.items()):
             passage_text = passage_info['passage']
-            # print(f"\n{passage_text}")
 
             """
             Tokenize passage
@@ -233,26 +232,26 @@ class DropReader(DatasetReader):
                          answer_type: str = None,
                          instance_index: int = None) -> Optional[Instance]:
         """
-            process a question/answer pair (related to a passage) and prepares an `Instance`
+        process a question/answer pair (related to a passage) and prepares an `Instance`
 
-            Parameters
-            ----------
-                question_text: str,
-                passage_text: str,
-                passage_tokens: List[Token],
-                passage_text_index_to_token_index: List[int],
-                passage_wordpieces: List[List[int]],
-                number_occurrences_in_passage: List[Dict[str, Any]],
-                question_id: str = None,
-                passage_id: str = None,
-                answer_annotations: List[Dict] = None,
-                answer_type: str = None,
-                instance_index: int = None
+        Parameters
+        ----------
+        question_text: str,
+        passage_text: str,
+        passage_tokens: List[Token],
+        passage_text_index_to_token_index: List[int],
+        passage_wordpieces: List[List[int]],
+        number_occurrences_in_passage: List[Dict[str, Any]],
+        question_id: str = None,
+        passage_id: str = None,
+        answer_annotations: List[Dict] = None,
+        answer_type: str = None,
+        instance_index: int = None
 
-            Returns
-            -------
-                instance: Optional[Instance]
-                    an `Instance` containing all the data that the `Model` will takes as the input
+        Returns
+        -------
+            instance: Optional[Instance]
+                an `Instance` containing all the data that the `Model` will takes as the input
         """
 
         # We alter it, so use a copy to keep it usable for the next questions with the same paragrpah

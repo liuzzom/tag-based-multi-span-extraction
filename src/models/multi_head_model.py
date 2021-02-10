@@ -29,13 +29,21 @@ class MultiHeadModel(Model):
                  output_all_answers: bool = False,
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
+        print("Constructor called...")
+        print("\tSuper Constructor called...")
         super().__init__(vocab, regularizer)
+        print("\tSuper Constructor ended...")
 
+        print("\tPretrained called...")
         self._pretrained_model = pretrained_model
+        print("\tTransformer Model called...")
         self._transformers_model = AutoModel.from_pretrained(pretrained_model)
 
+        print("\tHead called...")
         self._heads = torch.nn.ModuleDict(heads)
+        print("\tHead Predictor called...")
         self._head_predictor = head_predictor
+        print("\tSummary Vectors called...")
         self._passage_summary_vector_module = passage_summary_vector_module
         self._question_summary_vector_module = question_summary_vector_module
 

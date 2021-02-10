@@ -142,7 +142,13 @@ class QuorefReader(DatasetReader):
         for passage_id, passage_info in tqdm(dataset.items()):
             passage_text = passage_info['passage']
 
-            # Tokenize passage
+            """ Tokenize passage
+            - passage_tokens: [ĠTo, Ġstart, Ġthe, Ġseason, ...
+            - passage_text_index_to_token_index: [0, 0, 0, 1, 1, 1, 1, 1, 1, ...
+            - passage_words: [To, start, the, season, ,, the, ...
+            - passage_alignment_ [[0], [1], [2], [3], [4], [5], ...
+            - passage_wordpieces: [[0], [1], [2], [3], ...
+            """
             passage_tokens = self._tokenizer.tokenize_with_offsets(passage_text)
             passage_text_index_to_token_index = index_text_to_tokens(passage_text, passage_tokens)
             passage_words = self._word_tokenize(passage_text)
@@ -156,17 +162,22 @@ class QuorefReader(DatasetReader):
                         save_pkl(instances, self._pickle, self._is_training)
                     return
 
+                # extract question id and question text from the pair
                 question_id = qa_pair['query_id']
                 question_text = qa_pair['question']
 
+                # this list will contains the answer and the validated answers
                 answer_annotations: List[Dict] = list()
                 original_answer_annotations: List[List[Dict]] = list()
                 answer_type = None
                 if 'answer' in qa_pair and qa_pair['answer']:
+                    # extract the answer and the original answer
                     answer = qa_pair['answer']
                     original_answer = qa_pair['original_answer']
 
+                    # deduces the answer type checking the answer's fields
                     answer_type = get_answer_type(answer)
+                    # skips answer with a non-valid type
                     if answer_type is None or answer_type not in self._answer_types_filter:
                         continue
 
@@ -219,6 +230,28 @@ class QuorefReader(DatasetReader):
                          original_answer_annotations: List[List[Dict]] = None,
                          answer_type: str = None,
                          instance_index: int = None) -> Optional[Instance]:
+        """
+        process a question/answer pair (related to a passage) and prepares an `Instance`
+
+        Parameters
+        ----------
+            question_text: str,
+            passage_text: str,
+            passage_tokens: List[Token],
+            passage_text_index_to_token_index: List[int],
+            passage_wordpieces: List[List[int]],
+            question_id: str = None,
+            passage_id: str = None,
+            answer_annotations: List[Dict] = None,
+            original_answer_annotations: List[List[Dict]] = None,
+            answer_type: str = None,
+            instance_index: int = None) -> Optional[Instance]:
+
+        Returns
+        -------
+            instance: Optional[Instance]
+                an `Instance` containing all the data that the `Model` will takes as the input
+        """
 
         # Tokenize question
         question_tokens = self._tokenizer.tokenize_with_offsets(question_text)
