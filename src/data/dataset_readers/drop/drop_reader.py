@@ -27,6 +27,42 @@ logger = logging.getLogger(__name__)
 
 @DatasetReader.register('tbmse_drop')
 class DropReader(DatasetReader):
+    """
+        This class extends `DatasetReader` class. enabling reading from DROP dataset
+
+        Attributes
+        ---------
+        tokenizer: Tokenizer,
+        answer_field_generators: Dict[str, AnswerFieldGenerator],
+        answer_generator_names_per_type: Dict[str, List[str]],
+        old_reader_behavior: bool,
+        lazy: bool = False,
+        is_training: bool = False,
+        max_instances=-1,
+        answer_types_filter: List[str] = ALL_ANSWER_TYPES,
+        max_pieces: int = 512,
+        uncased: bool = False,
+        standardize_texts: bool = True,
+        pickle: Dict[str, Any] = {'action': None}):
+
+        Methods
+        -------
+        read(self, file_path: str)
+            reads the file containing the dataset
+
+        text_to_instance(self,
+                         question_text: str,
+                         passage_text: str,
+                         passage_tokens: List[Token],
+                         passage_text_index_to_token_index: List[int],
+                         passage_wordpieces: List[List[int]],
+                         number_occurrences_in_passage: List[Dict[str, Any]],
+                         question_id: str = None,
+                         passage_id: str = None,
+                         answer_annotations: List[Dict] = None,
+                         answer_type: str = None,
+                         instance_index: int = None) -> Optional[Instance]
+    """
     def __init__(self,
                  tokenizer: Tokenizer,
                  answer_field_generators: Dict[str, AnswerFieldGenerator],
@@ -71,10 +107,27 @@ class DropReader(DatasetReader):
 
     @overrides
     def _read(self, file_path: str):
+        """
+        This method reads the file containing the dataset and prepares the data for the model. It processes the
+        passage text and calls `text_to_instance` method to process the question/answer text
+
+        Parameters
+        ----------
+        file_path: str
+            the file location of the dataset
+
+        Returns
+        -------
+        instances: Iterable
+            an Iterable (a generator) that contains pre-processed data as a list of `Instance` objects;
+        """
+
         instances_count = 0
         if not self._lazy and self._pickle['action'] == 'load':
+            print("entra nell'if del load")
             # Try to load the data, if it fails then read it from scratch and save it
             loaded_pkl = load_pkl(self._pickle, self._is_training)
+            print(loaded_pkl)
             if loaded_pkl is not None:
                 for instance in loaded_pkl:
                     if 0 < self._max_instances <= instances_count:
@@ -95,8 +148,16 @@ class DropReader(DatasetReader):
         instances = []
         for passage_id, passage_info in tqdm(dataset.items()):
             passage_text = passage_info['passage']
+            # print(f"\n{passage_text}")
 
-            # Tokenize passage
+            """
+            Tokenize passage
+            - passage_tokens: [ĠTo, Ġstart, Ġthe, Ġseason, ...
+            - passage_text_index_to_token_index: [0, 0, 0, 1, 1, 1, 1, 1, 1, ...
+            - passage_words: [To, start, the, season, ,, the, ...
+            - passage_alignment_ [[0], [1], [2], [3], [4], [5], ...
+            - passage_wordpieces: [[0], [1], [2], [3], ...
+            """
             passage_tokens = self._tokenizer.tokenize_with_offsets(passage_text)
             passage_text_index_to_token_index = index_text_to_tokens(passage_text, passage_tokens)
             passage_words = number_extraction_tokens = self._word_tokenize(passage_text)
@@ -113,15 +174,20 @@ class DropReader(DatasetReader):
                         save_pkl(instances, self._pickle, self._is_training)
                     return
 
+                # extract question id and question text from the pair
                 question_id = qa_pair['query_id']
                 question_text = qa_pair['question']
 
+                # this list will contains the answer and the validated answers
                 answer_annotations: List[Dict] = list()
                 answer_type = None
                 if 'answer' in qa_pair and qa_pair['answer']:
+                    # extract the answer
                     answer = qa_pair['answer']
 
+                    # deduces the answer type checking the answer's fields
                     answer_type = get_answer_type(answer)
+                    # skips answer with a non-valid type
                     if answer_type is None or answer_type not in self._answer_types_filter:
                         continue
 
@@ -166,24 +232,60 @@ class DropReader(DatasetReader):
                          answer_annotations: List[Dict] = None,
                          answer_type: str = None,
                          instance_index: int = None) -> Optional[Instance]:
+        """
+            process a question/answer pair (related to a passage) and prepares an `Instance`
+
+            Parameters
+            ----------
+                question_text: str,
+                passage_text: str,
+                passage_tokens: List[Token],
+                passage_text_index_to_token_index: List[int],
+                passage_wordpieces: List[List[int]],
+                number_occurrences_in_passage: List[Dict[str, Any]],
+                question_id: str = None,
+                passage_id: str = None,
+                answer_annotations: List[Dict] = None,
+                answer_type: str = None,
+                instance_index: int = None
+
+            Returns
+            -------
+                instance: Optional[Instance]
+                    an `Instance` containing all the data that the `Model` will takes as the input
+        """
+
         # We alter it, so use a copy to keep it usable for the next questions with the same paragrpah
         number_occurrences_in_passage = [number_occurrence.copy() for number_occurrence in
                                          number_occurrences_in_passage]
 
-        # Tokenize question
+        """ Tokenize question
+        - question_tokens: [ĠHow, Ġmany, Ġpoints, Ġdid, Ġthe, Ġbu, cc, aneers, Ġneed, ...
+        - question_text_index_to_token_index: [0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, ...
+        - question_words: [How, many, points, did, the, buccaneers, need, to, tie, in, the, first, ?] 
+        - question_alignment: [[0], [1], [2], [3], [4], [5, 6, 7], [8], [9], [10], [11], [12], [13], [14]]
+        - question_wordpieces: [[0], [1], [2], [3], [4], [5, 6, 7], [5, 6, 7], [5, 6, 7], [8], [9], [10], ...
+        """
         question_tokens = self._tokenizer.tokenize_with_offsets(question_text)
         question_text_index_to_token_index = index_text_to_tokens(question_text, question_tokens)
         question_words = self._word_tokenize(question_text)
         question_alignment = self._tokenizer.align_tokens_to_tokens(question_text, question_words, question_tokens)
         question_wordpieces = self._tokenizer.alignment_to_token_wordpieces(question_alignment)
 
-        # Index tokens
+        """ Index tokens
+        encoded_inputs is a dictionary with:
+        - 'special_tokens_mask',
+        - 'input_ids',
+        - 'token_type_ids',
+        - 'attention_mask'
+        """
         encoded_inputs = self._tokenizer.encode_plus([token.text for token in question_tokens],
                                                      [token.text for token in passage_tokens],
                                                      add_special_tokens=True, max_length=self._max_pieces,
                                                      truncation_strategy='only_second',
                                                      return_token_type_ids=True,
                                                      return_special_tokens_mask=True)
+
         question_passage_token_type_ids = encoded_inputs['token_type_ids']
         question_passage_special_tokens_mask = encoded_inputs['special_tokens_mask']
 
@@ -235,6 +337,7 @@ class DropReader(DatasetReader):
             'indices': [-1]
         })
 
+        # create fields dictionary for the `Instance`
         fields: Dict[str, Field] = {}
 
         fields['question_passage_tokens'] = question_passage_field = LabelsField(encoded_inputs['input_ids'])

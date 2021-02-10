@@ -84,7 +84,7 @@
     },
     "dataset_reader": {
         "type": error "Must override reader.type",
-        "lazy": true,
+        "lazy": false,
         "tokenizer": {
             "type": "huggingface_transformers",
             "pretrained_model": $.pretrained_model
@@ -123,7 +123,7 @@
     "train_data_path": error "Must override train_data_path",
     "validation_data_path": error "Must override validation_data_path",
     "trainer": {
-        "cuda_device": -1,
+        "cuda_device": 0,
         "keep_serialized_model_every_num_seconds": 3600,
         "num_epochs": 20,
         "optimizer": {
