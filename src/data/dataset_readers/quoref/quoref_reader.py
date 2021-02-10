@@ -24,6 +24,43 @@ logger = logging.getLogger(__name__)
 
 @DatasetReader.register('tbmse_quoref')
 class QuorefReader(DatasetReader):
+    """
+        This class extends `DatasetReader` class. enabling reading from Quoref dataset
+
+        Attributes
+        ---------
+        tokenizer: Tokenizer,
+        answer_field_generators: Dict[str, AnswerFieldGenerator],
+        answer_generator_names_per_type: Dict[str, List[str]],
+        old_reader_behavior: bool,
+        lazy: bool = False,
+        is_training: bool = False,
+        max_instances=-1,
+        answer_types_filter: List[str] = ALL_ANSWER_TYPES,
+        max_pieces: int = 512,
+        uncased: bool = False,
+        standardize_texts: bool = False,
+        pickle: Dict[str, Any] = {'action': None}):
+
+        Methods
+        -------
+        read(self, file_path: str)
+            reads the file containing the dataset
+
+        text_to_instance(self,
+                         question_text: str,
+                         passage_text: str,
+                         passage_tokens: List[Token],
+                         passage_text_index_to_token_index: List[int],
+                         passage_wordpieces: List[List[int]],
+                         number_occurrences_in_passage: List[Dict[str, Any]],
+                         question_id: str = None,
+                         passage_id: str = None,
+                         answer_annotations: List[Dict] = None,
+                         answer_type: str = None,
+                         instance_index: int = None) -> Optional[Instance]
+        """
+
     def __init__(self,
                  tokenizer: Tokenizer,
                  answer_field_generators: Dict[str, AnswerFieldGenerator],
@@ -69,6 +106,20 @@ class QuorefReader(DatasetReader):
 
     @overrides
     def _read(self, file_path: str):
+        """
+        This method reads the file containing the dataset and prepares the data for the model. It processes the
+        passage text and calls `text_to_instance` method to process the question/answer text
+
+        Parameters
+        ----------
+        file_path: str
+            the file location of the dataset
+
+        Returns
+        -------
+        instances: Iterable
+            an Iterable (a generator) that contains pre-processed data as a list of `Instance` objects;
+        """
         if not self._lazy and self._pickle['action'] == 'load':
             # Try to load the data, if it fails then read it from scratch and save it
             loaded_pkl = load_pkl(self._pickle, self._is_training)

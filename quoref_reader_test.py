@@ -1,11 +1,9 @@
-from src.data.dataset_readers.drop.drop_reader import DropReader
-from src.data.tokenizers.huggingface_transformers_tokenizer import HuggingfaceTransformersTokenizer
-from src.data.dataset_readers.answer_field_generators.tagged_answer_generator import TaggedAnswerGenerator
 from src.data.dataset_readers.answer_field_generators.arithmetic_answer_generator import ArithmeticAnswerGenerator
 from src.data.dataset_readers.answer_field_generators.count_answer_generator import CountAnswerGenerator
 from src.data.dataset_readers.answer_field_generators.span_answer_generator import SpanAnswerGenerator
-
-tokenizer = HuggingfaceTransformersTokenizer(pretrained_model="roberta-large")
+from src.data.dataset_readers.answer_field_generators.tagged_answer_generator import TaggedAnswerGenerator
+from src.data.dataset_readers.quoref.quoref_reader import QuorefReader
+from src.data.tokenizers.huggingface_transformers_tokenizer import HuggingfaceTransformersTokenizer
 
 answer_field_generators = {
     "arithmetic_answer": ArithmeticAnswerGenerator(special_numbers=[100, 1]),
@@ -24,12 +22,14 @@ answer_generator_names_per_type = {
 
 pickle = {"action": None, "file_name": "all_heads_IO_roberta-large", "path": "../pickle/drop"}
 
-dropReader = DropReader(
-    tokenizer=tokenizer,
+tokenizer = HuggingfaceTransformersTokenizer(pretrained_model="roberta-large")
+
+quorefReader = QuorefReader(
     answer_field_generators=answer_field_generators,
     answer_generator_names_per_type=answer_generator_names_per_type,
     is_training=True,
     old_reader_behavior=True,
-    pickle=pickle)
+    pickle=pickle,
+    tokenizer=tokenizer)
 
-dropReader.read('drop_data/drop_single_sample.json')
+quorefReader.read('quoref_data/quoref_dataset_dev.json')
