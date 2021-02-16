@@ -34,6 +34,7 @@ class MultiHeadModel(Model):
         initializer: InitializerApplicator = InitializerApplicator(),
         regularizer: Optional[RegularizerApplicator] = None
     """
+
     def __init__(self,
                  vocab: Vocabulary,
                  pretrained_model: str,
@@ -47,7 +48,6 @@ class MultiHeadModel(Model):
                  initializer: InitializerApplicator = InitializerApplicator(),
                  regularizer: Optional[RegularizerApplicator] = None) -> None:
         super().__init__(vocab, regularizer)
-
 
         self._pretrained_model = pretrained_model
         self._transformers_model = AutoModel.from_pretrained(pretrained_model)
@@ -152,19 +152,21 @@ class MultiHeadModel(Model):
             (1 - question_passage_token_type_ids) * question_passage_pad_mask * question_passage_special_tokens_mask
         question_and_passage_mask = question_mask | passage_mask
 
+        # Use pre-trained model to compute the representations of the input data
         # Shape: (batch_size, seqlen, bert_dim)
+        token_type_ids = question_passage_token_type_ids if not self._pretrained_model.startswith('roberta-') else None
         token_representations = self._transformers_model(question_passage_tokens,
-                                                         token_type_ids=(question_passage_token_type_ids
-                                                                         if not self._pretrained_model.startswith('roberta-')
-                                                                         else None),
+                                                         token_type_ids=token_type_ids,
                                                          attention_mask=question_passage_pad_mask)[0]
 
+        # if desired, compute the passage summary vector
         if self._passage_summary_vector_module is not None:
             # Shape: (batch_size, bert_dim)
             passage_summary_vector = self.summary_vector(token_representations, passage_mask, 'passage')
         else:
             passage_summary_vector = None
 
+        # if desired, compute the question summary vector
         if self._question_summary_vector_module is not None:
             # Shape: (batch_size, bert_dim)
             question_summary_vector = self.summary_vector(token_representations, question_mask, 'question')
@@ -172,6 +174,7 @@ class MultiHeadModel(Model):
             question_summary_vector = None
 
         if head_count > 1:
+            # use the head_predictor with the summary vectors
             # Shape: (batch_size, number_of_abilities)
             answer_ability_logits = \
                 self._head_predictor(torch.cat([passage_summary_vector, question_summary_vector], -1))
@@ -204,17 +207,25 @@ class MultiHeadModel(Model):
         if has_answer:
             log_marginal_likelihood_list = []
             for head_name, head in self._heads.items():
+                # The marginal log likelihood is calculated for each head separately
                 log_marginal_likelihood = head.gold_log_marginal_likelihood(**kwargs, **head_outputs[head_name])
+                """ log probability for each head to be selected is added
+                (which is like AND/multiplication, but in logspace). """
                 log_marginal_likelihood_list.append(log_marginal_likelihood)
 
             if head_count > 1:
                 # Add the ability probabilities if there is more than one ability
+                """ all the likelihoods are combined by summation 
+                (this is like OR, as we want to maximize the probability that any of the heads is right, 
+                and not that all of them are right).  """
                 all_log_marginal_likelihoods = torch.stack(log_marginal_likelihood_list, dim=-1)
                 all_log_marginal_likelihoods = all_log_marginal_likelihoods + answer_ability_log_probs
                 marginal_log_likelihood = util.logsumexp(all_log_marginal_likelihoods)
             else:
                 marginal_log_likelihood = log_marginal_likelihood_list[0]
 
+            # Finally, we compute the mean loss across the batch elements.
+            # put the loss in the output dictionary
             output_dict['loss'] = -1 * marginal_log_likelihood.mean()
 
         with torch.no_grad():
@@ -246,8 +257,7 @@ class MultiHeadModel(Model):
                         'p_text': metadata[i]['original_passage'],
                         'qp_tokens': metadata[i]['question_passage_tokens'],
                         'question_passage_wordpieces': metadata[i]['question_passage_wordpieces'],
-                        'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in metadata[
-                            i] else None,
+                        'original_numbers': metadata[i]['original_numbers'] if 'original_numbers' in metadata[i] else None,
                     }
 
                     # keys that cannot be passed because 
@@ -354,8 +364,9 @@ class MultiHeadModel(Model):
         metrics = {'em': exact_match, 'f1': f1_score}
 
         for answer_type, type_scores_per_head in scores_per_answer_type_and_head.items():
-            for head, (
-            answer_type_head_exact_match, answer_type_head_f1_score, type_head_count) in type_scores_per_head.items():
+            for head, \
+                (answer_type_head_exact_match, answer_type_head_f1_score,
+                 type_head_count) in type_scores_per_head.items():
                 if 'multi' in head and 'span' in answer_type:
                     metrics[f'em_{answer_type}_{head}'] = answer_type_head_exact_match
                     metrics[f'f1_{answer_type}_{head}'] = answer_type_head_f1_score

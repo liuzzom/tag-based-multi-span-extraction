@@ -164,4 +164,24 @@ model = MultiHeadModel(
 print("...Created")
 
 test_instance = instances[0]
-print(test_instance)
+test_fields = test_instance.fields
+
+model.forward(
+    question_passage_tokens=test_fields['question_passage_tokens'].as_tensor(),
+    question_passage_token_type_ids=test_fields['question_passage_token_type_ids'].as_tensor(),
+    question_passage_special_tokens_mask=test_fields['question_passage_special_tokens_mask'].as_tensor(),
+    question_passage_pad_mask=test_fields['question_passage_pad_mask'].as_tensor(),
+    first_wordpiece_mask=test_fields['first_wordpiece_mask'].as_tensor(),
+    number_indices=test_fields['number_indices'].as_tensor(),
+    answer_as_expressions=test_fields['answer_as_expressions'].as_tensor(),
+    answer_as_expressions_extra=test_fields['answer_as_expressions_extra'].as_tensor(),
+    answer_as_counts=test_fields['answer_as_counts'].as_tensor(),
+    answer_as_passage_spans=test_fields['answer_as_passage_spans'].as_tensor(),
+    answer_as_question_spans=test_fields['answer_as_question_spans'].as_tensor(),
+    wordpiece_indices=test_fields['wordpiece_indices'].as_tensor(),
+    answer_as_text_to_disjoint_bios=test_fields['answer_as_text_to_disjoint_bios'].as_tensor(),
+    answer_as_list_of_bios=test_fields['answer_as_list_of_bios'].as_tensor(),
+    span_bio_labels=test_fields['span_bio_labels'].as_tensor(),
+    is_bio_mask=test_fields['is_bio_mask'].as_tensor(),
+    metadata=test_fields['metadata'].as_tensor()
+)
